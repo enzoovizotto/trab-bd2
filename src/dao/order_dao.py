@@ -9,7 +9,7 @@ class OrderDAO:
         conn = self.db.connect()
         cursor = conn.cursor()
         try:
-            # Versão vulnerável a SQL injection (quando unsafe=True)
+            #Versão vulnerável a SQL injection (quando unsafe=True)
             if unsafe:                
                 query = f"""
                     INSERT INTO northwind.orders (customerid, employeeid, orderdate)
