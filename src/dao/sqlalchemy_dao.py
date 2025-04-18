@@ -20,26 +20,26 @@ class SQLAlchemyDAO:
         try:
             # Create new order
             new_order = Order(
-                customer_id=customer_id,
-                employee_id=employee_id,
-                order_date=datetime.now()
+                customerid=customer_id,
+                employeeid=employee_id,
+                orderdate=datetime.now()
             )
             self.session.add(new_order)
-            self.session.flush()  # To get the order_id
+            self.session.flush()  # To get the orderid
 
             # Create order details
             for item in order_items:
                 order_detail = OrderDetail(
-                    order_id=new_order.order_id,
-                    product_id=item['productid'],
-                    unit_price=item['unitprice'],
+                    orderid=new_order.orderid,
+                    productid=item['productid'],
+                    unitprice=item['unitprice'],
                     quantity=item['quantity'],
                     discount=item.get('discount', 0)
                 )
                 self.session.add(order_detail)
 
             self.session.commit()
-            return new_order.order_id
+            return new_order.orderid
 
         except SQLAlchemyError as e:
             self.session.rollback()
@@ -48,7 +48,7 @@ class SQLAlchemyDAO:
     def get_order_details(self, order_id):
         try:
             order = self.session.query(Order)\
-                .filter(Order.order_id == order_id)\
+                .filter(Order.orderid == order_id)\
                 .first()
 
             if not order:
@@ -57,13 +57,13 @@ class SQLAlchemyDAO:
             result = []
             for detail in order.order_details:
                 result.append({
-                    'orderid': order.order_id,
-                    'orderdate': order.order_date,
-                    'customername': order.customer.company_name,
-                    'employeename': f"{order.employee.first_name} {order.employee.last_name}",
-                    'productname': detail.product.product_name,
+                    'orderid': order.orderid,
+                    'orderdate': order.orderdate,
+                    'customername': order.customer.companyname,
+                    'employeename': f"{order.employee.firstname} {order.employee.lastname}",
+                    'productname': detail.product.productname,
                     'quantity': detail.quantity,
-                    'unitprice': detail.unit_price
+                    'unitprice': detail.unitprice
                 })
 
             return result
@@ -75,24 +75,24 @@ class SQLAlchemyDAO:
         try:
             ranking = self.session.query(
                 Employee,
-                func.count(Order.order_id).label('totalorders'),
+                func.count(Order.orderid).label('totalorders'),
                 func.sum(
-                    OrderDetail.unit_price * OrderDetail.quantity * 
+                    OrderDetail.unitprice * OrderDetail.quantity * 
                     (1 - OrderDetail.discount)
                 ).label('totalsales')
-            ).join(Order, Employee.employee_id == Order.employee_id)\
-             .join(OrderDetail, Order.order_id == OrderDetail.order_id)\
-             .filter(Order.order_date.between(start_date, end_date))\
-             .group_by(Employee.employee_id)\
+            ).join(Order, Employee.employeeid == Order.employeeid)\
+             .join(OrderDetail, Order.orderid == OrderDetail.orderid)\
+             .filter(Order.orderdate.between(start_date, end_date))\
+             .group_by(Employee.employeeid)\
              .order_by(func.sum(
-                 OrderDetail.unit_price * OrderDetail.quantity * 
+                 OrderDetail.unitprice * OrderDetail.quantity * 
                  (1 - OrderDetail.discount)
              ).desc())\
              .all()
 
             return [
                 {
-                    'employeename': f"{emp.first_name} {emp.last_name}",
+                    'employeename': f"{emp.firstname} {emp.lastname}",
                     'totalorders': total_orders,
                     'totalsales': float(total_sales or 0)
                 }
