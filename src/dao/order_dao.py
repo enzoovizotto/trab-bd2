@@ -13,7 +13,7 @@ class OrderDAO:
             if unsafe:                
                 query = f"""
                     INSERT INTO northwind.orders (customerid, employeeid, orderdate)
-                    VALUES ({order.customer_id}, {order.employee_id}, '{order.order_date}')
+                    VALUES ('{order.customer_id}', {order.employee_id}, '{order.order_date}')
                     RETURNING orderid
                 """
             else:
@@ -36,7 +36,7 @@ class OrderDAO:
                 if unsafe:
                     detail_query = f"""
                         INSERT INTO northwind.order_details (orderid, productid, unitprice, quantity, discount)
-                        VALUES ({order_id}, '{detail.product_id}', '{detail.unit_price}', '{detail.quantity}', '{detail.discount}')
+                        VALUES ({order_id}, {detail.product_id}, {detail.unit_price}, {detail.quantity}, {detail.discount})
                     """
                     cursor.execute(detail_query)
                 else:

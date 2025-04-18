@@ -7,14 +7,13 @@ class OrderController:
         self.order_dao = OrderDAO()
 
     def create_order(self, customer_id, employee_id, order_items, unsafe=False):
-        # Criar objeto Order
+   
         order = Order(
             customer_id=customer_id,
             employee_id=employee_id,
             order_date=datetime.now()
         )
 
-        # Criar lista de OrderDetail
         order_details = []
         for item in order_items:
             detail = OrderDetail(
@@ -25,7 +24,6 @@ class OrderController:
             )
             order_details.append(detail)
 
-        # Usar o DAO para criar o pedido
         return self.order_dao.create_order(order, order_details, unsafe)
 
     def get_order_details(self, order_id):
